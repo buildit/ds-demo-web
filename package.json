@@ -4,7 +4,11 @@
   "description": "Design System Demo Website.",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "clean": "gulp clean",
+    "build": "npm run clean && gulp build",
+    "serve": "gulp serve",
+    "start": "gulp",
+    "brandai": "node ./scripts/brandai"
   },
   "repository": {
     "type": "git",
@@ -17,6 +21,9 @@
   },
   "homepage": "https://github.com/buildit/ds-demo-web#readme",
   "devDependencies": {
+    "chalk": "^1.1.3",
+    "download": "^5.0.3",
+    "extract-zip": "^1.6.0",
     "gulp": "^3.9.1",
     "gulp-clean": "^0.3.2",
     "gulp-clean-css": "^3.0.4",
@@ -25,6 +32,7 @@
     "gulp-connect": "^5.0.0",
     "gulp-open": "^2.0.0",
     "gulp-uglify": "^2.1.2",
-    "gulp-watch": "^4.3.11"
+    "gulp-watch": "^4.3.11",
+    "less": "^2.7.2"
   }
 }
