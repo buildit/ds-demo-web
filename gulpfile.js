@@ -6,6 +6,11 @@ const less = require('gulp-less');
 const watch = require('gulp-watch');
 const open = require('gulp-open');
 const sourcemaps = require('gulp-sourcemaps');
+const handlebars = require('gulp-handlebars');
+const wrap = require('gulp-wrap');
+const declare = require('gulp-declare');
+const concat = require('gulp-concat');
+const merge = require('merge-stream');
 
 const src = 'src';
 const target = 'dist';
@@ -22,9 +27,15 @@ gulp.task('serve', () => {
 
 // File watcher
 gulp.task('watch', () => {
-  gulp.watch([`${src}/**`, `!${src}/css/*`, `!${src}/**/*.html`], { ignoreInitial: false }, ['copy-files']);
+  gulp.watch([
+    `${src}/**`,
+    `!${src}/css/*`,
+    `!${src}/**/*.html`,
+    `!${src}/**/*.hbs`
+  ], { ignoreInitial: false }, ['copy-files']);
   gulp.watch([`${src}/**/*.html`], { ignoreInitial: false }, ['html']);
   gulp.watch([`${src}/css/**/*`], { ignoreInitial: false }, ['css']);
+  gulp.watch([`${src}/**/*.hbs`], { ignoreInitial: false }, ['templates']);
 });
 
 // Clean the output directory
@@ -35,7 +46,13 @@ gulp.task('clean', () => {
 
 // Copy all assets except our HTML and CSS
 gulp.task('copy-files', () => {
-  return gulp.src([`${src}/**`, `!${src}/css/*`, `!${src}/**/*.html`])
+  return gulp.src([
+      `${src}/**`,
+      './node_modules/handlebars/dist/handlebars.runtime.js',
+      `!${src}/css/*`,
+      `!${src}/**/*.html`,
+      `!${src}/**/*.hbs`
+    ])
     .pipe(gulp.dest(target))
     .pipe(connect.reload());
 });
@@ -62,5 +79,30 @@ gulp.task('css', () => {
     .pipe(connect.reload());
 });
 
-gulp.task('build', ['copy-files', 'html', 'css']);
+gulp.task('templates', function() {
+  let partials = gulp.src([`${src}/components/*.hbs`])
+    .pipe(handlebars())
+    .pipe(wrap('Handlebars.registerPartial(<%= processPartialName(file.relative) %>, Handlebars.template(<%= contents %>));', {}, {
+      imports: {
+        processPartialName: function(fileName) {
+          return JSON.stringify(path.basename(fileName, '.js'));
+        }
+      }
+    }));
+
+  let templates = gulp.src(`${src}/main.hbs`)
+    .pipe(handlebars())
+    .pipe(wrap('Handlebars.template(<%= contents %>)'))
+    .pipe(declare({
+      namespace: 'MySite.templates',
+      noRedeclare: true // Avoid duplicate declarations
+    }));
+
+  // Output both the partials and the templates as build/js/templates.js
+  return merge(partials, templates)
+    .pipe(concat('templates.js'))
+    .pipe(gulp.dest(`${target}`));
+});
+
+gulp.task('build', ['copy-files', 'html', 'css', 'templates']);
 gulp.task('default', ['build', 'serve', 'watch']);
