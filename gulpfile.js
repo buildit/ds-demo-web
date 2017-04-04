@@ -101,7 +101,8 @@ gulp.task('templates', function() {
   // Output both the partials and the templates as build/js/templates.js
   return merge(partials, templates)
     .pipe(concat('templates.js'))
-    .pipe(gulp.dest(`${target}`));
+    .pipe(gulp.dest(`${target}`))
+    .pipe(connect.reload());
 });
 
 gulp.task('build', ['copy-files', 'html', 'css', 'templates']);
