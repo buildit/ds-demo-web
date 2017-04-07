@@ -36,6 +36,7 @@ gulp.task('watch', () => {
   gulp.watch([`${src}/**/*.html`], { ignoreInitial: false }, ['html']);
   gulp.watch([`${src}/css/**/*`], { ignoreInitial: false }, ['css']);
   gulp.watch([`${src}/**/*.hbs`], { ignoreInitial: false }, ['templates']);
+  gulp.watch(['node_modules/@buildit/**/*'], { ignoreInitial: false }, ['css']);
 });
 
 // Clean the output directory
